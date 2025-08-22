@@ -1,0 +1,43 @@
+# Name des Workflows, wie er in GitHub Actions angezeigt wird
+name: Docker Image Build and Push
+
+# Definiert, wann dieser Workflow gestartet wird.
+# Er wird bei jedem Push auf den 'main' Branch ausgelöst.
+on:
+  push:
+    branches: [ main ]
+
+# Definiert einen einzigen Job namens 'build-and-push'.
+jobs:
+  build-and-push:
+    # Der Job läuft auf einem Ubuntu-Runner.
+    runs-on: ubuntu-latest
+
+    # Die Schritte, die im Job ausgeführt werden.
+    steps:
+      # Schritt 1: Das Repository auschecken
+      # Stellt sicher, dass der Workflow Zugriff auf Ihren Code hat.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Schritt 2: Anmeldung bei Docker Hub
+      # Verwendet GitHub Secrets für sichere Anmeldedaten.
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      # Schritt 3: Docker-Image bauen und pushen
+      # Nutzt die offiziellen Docker-Actions, um den Prozess zu vereinfachen.
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          # Build-Kontext ist das aktuelle Verzeichnis (.)
+          context: .
+          # Push-Befehl ausführen, um das Image in Docker Hub hochzuladen
+          push: true
+          # Tags für das Image definieren
+          tags: michaelotto1966/captain-live-code-server:latest
+          # Die Dockerfile im aktuellen Verzeichnis wird verwendet
+          file: ./Dockerfile
