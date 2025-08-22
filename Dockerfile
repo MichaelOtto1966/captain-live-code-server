@@ -24,25 +24,39 @@ RUN apt-get update && \
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Erstellen des Startskripts direkt im Dockerfile
-# Dadurch werden Probleme mit Dateirechten und Zeilenumbrüchen vermieden
-RUN echo '#!/bin/sh' > /start.sh && \
-    echo 'PERSISTENT_DIR="/home/coder/$CAPTAIN_APP_NAME"' >> /start.sh && \
-    echo 'TEMP_SOURCE_DIR="/tmp/app_source"' >> /start.sh && \
-    echo 'mkdir -p "$PERSISTENT_DIR"' >> /start.sh && \
-    echo 'cp -r "$TEMP_SOURCE_DIR/." "$PERSISTENT_DIR"' >> /start.sh && \
-    echo 'code-server \\' >> /start.sh && \
-    echo '--bind-addr 0.0.0.0:8080 \\' >> /start.sh && \
-    echo '--auth none \\' >> /start.sh && \
-    echo '--disable-telemetry \\' >> /start.sh && \
-    echo '"$PERSISTENT_DIR"' >> /start.sh && \
-    chmod +x /start.sh
+# Erstellen des Startskripts direkt im Dockerfile mit einem "Here-Document"
+# Dies ist eine viel robustere Methode als die Verwendung von "echo",
+# da sie Probleme mit Escape-Zeichen und Zeilenumbrüchen vermeidet.
+RUN cat << 'EOF' > /start.sh
+#!/bin/sh
+
+# Das Verzeichnis, das von CapRover persistent gemacht wird
+PERSISTENT_DIR="/home/coder/$CAPTAIN_APP_NAME"
+TEMP_SOURCE_DIR="/tmp/app_source"
+
+echo "Erstelle persistentes Verzeichnis für $CAPTAIN_APP_NAME..."
+mkdir -p "$PERSISTENT_DIR"
+
+echo "Kopiere Anwendungsdateien in das persistente Verzeichnis..."
+cp -r "$TEMP_SOURCE_DIR/." "$PERSISTENT_DIR"
+
+echo "Starte Code-Server..."
+code-server \
+  --bind-addr 0.0.0.0:8080 \
+  --auth none \
+  --disable-telemetry \
+  "$PERSISTENT_DIR"
+EOF
+
+# Machen Sie das Startskript ausführbar
+RUN chmod +x /start.sh
 
 # Kopieren des gesamten Quellcodes
 COPY . /tmp/app_source/
 
 # Setzen Sie den dynamischen Startbefehl, der das Skript ausführt
 CMD ["/start.sh"]
+
 
 
 
