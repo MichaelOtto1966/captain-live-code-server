@@ -1,24 +1,28 @@
 #!/bin/sh
 
-# Das Verzeichnis, das von CapRover persistent gemacht wird.
-PERSISTENT_DIR="/home/coder/persistent-data"
+# Das Verzeichnis, das Sie in CapRover als persistenten Pfad einstellen.
+# CapRover garantiert die Eindeutigkeit dieses Pfades pro App.
+PERSISTENT_DIR="/home/coder/app_data"
 
-# Erstellen Sie ein temporäres, eindeutiges Verzeichnis für diese App-Instanz.
-# CapRover garantiert die Eindeutigkeit des persistenten Volumes, auf das
-# dieses temporäre Verzeichnis gemountet wird.
-APP_DIR="/home/coder/app-instance-$CAPTAIN_APP_NAME"
-TEMP_SOURCE_DIR="/app_temp"
+# Das temporäre Verzeichnis, in das die Dockerfile die Quelldaten kopiert.
+SOURCE_DIR="/tmp/app_source"
 
-echo "Erstelle temporäres Verzeichnis für $CAPTAIN_APP_NAME..."
-mkdir -p "$APP_DIR"
+echo "Überprüfe, ob das persistente Verzeichnis leer ist..."
 
-echo "Kopiere Anwendungsdateien in das temporäre Verzeichnis..."
-# Die -n Option verhindert, dass das Kopieren fehlschlägt, falls das Verzeichnis bereits existiert.
-cp -rn "$TEMP_SOURCE_DIR/." "$APP_DIR"
+# Überprüfen Sie, ob das persistente Verzeichnis leer ist,
+# indem Sie eine leere Liste von Dateien abfragen.
+if [ -z "$(ls -A "$PERSISTENT_DIR")" ]; then
+   echo "Das persistente Verzeichnis ist leer. Kopiere initiale Anwendungsdateien..."
+   # Kopiere alle Dateien vom temporären Quellverzeichnis in das persistente.
+   cp -r "$SOURCE_DIR/." "$PERSISTENT_DIR"
+else
+   echo "Das persistente Verzeichnis enthält bereits Daten. Überspringe Kopiervorgang."
+fi
 
+# Starte den Code-Server mit dem persistenten Verzeichnis als Arbeitsbereich.
 echo "Starte Code-Server..."
 code-server \
   --bind-addr 0.0.0.0:8080 \
   --auth none \
   --disable-telemetry \
-  "$APP_DIR"
+  "$PERSISTENT_DIR"
