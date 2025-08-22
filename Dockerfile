@@ -10,20 +10,20 @@ EXPOSE 8080
 # Wechseln Sie zu einem Benutzer mit Root-Rechten, um Pakete zu installieren
 USER root
 
-# Aktualisieren Sie die Paketliste und installieren Sie Node.js, npm und das CapRover CLI
+# Aktualisieren Sie die Paketliste und installieren Sie die notwendigen Tools.
 RUN apt-get update && \
     apt-get install -y nodejs npm && \
-    npm install -g caprover && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Kopieren Sie den gesamten Quellcode in ein festes, statisches Verzeichnis
-# Dieses Verzeichnis wird für die Persistenz verwendet
-COPY . /home/coder/app
+# Kopieren Sie alle Projektdateien, einschließlich des Startskripts.
+COPY . /app
 
-# Starten Sie den Code-Server und verwenden Sie das statische Verzeichnis als Arbeitsbereich.
-# Das `-P` Flag stellt sicher, dass der Port richtig gemappt wird.
-CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "--disable-telemetry", "/home/coder/app"]
+# Setzen Sie den dynamischen Startbefehl.
+# Dieser Befehl führt unser Startskript aus, das die App mit einem
+# eindeutigen, dynamischen Verzeichnis startet.
+CMD ["/app/start.sh"]
+
