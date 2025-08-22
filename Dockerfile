@@ -15,20 +15,3 @@ RUN apt-get update && \
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Festlegen des Arbeitsverzeichnisses
-WORKDIR /home/coder/project
-
-# Kopieren der aktuellen Dateien in das Arbeitsverzeichnis des Images
-# Dies ist nur für den initialen Build relevant
-COPY . .
-
-# Deklarieren eines Volumes für das Arbeitsverzeichnis
-# Dies stellt sicher, dass alle Daten in diesem Verzeichnis
-# bei Container-Neustarts oder -Ersetzungen erhalten bleiben.
-VOLUME /home/coder/project
-
-# Exponieren des Standard-Ports von Code-Server
-EXPOSE 8080
-
-# Befehl zum Starten des Servers
-CMD ["/usr/bin/dumb-init", "code-server", "--bind-addr", "0.0.0.0:8080", "/home/coder/project"]
