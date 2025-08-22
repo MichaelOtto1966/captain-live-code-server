@@ -13,6 +13,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Ändern Sie den Besitzer des Home-Verzeichnisses zu "coder".
+# Dies ist entscheidend, damit der Nicht-Root-Benutzer Schreibrechte hat.
+RUN chown -R coder:coder /home/coder
+
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
@@ -23,6 +27,7 @@ COPY . /tmp/app_source/
 # Setzen Sie den dynamischen Startbefehl.
 # Dieser Befehl führt ein Startskript aus, das die App korrekt konfiguriert.
 CMD ["/tmp/app_source/start.sh"]
+
 
 
 
