@@ -13,8 +13,9 @@ echo "Überprüfe, ob das persistente Verzeichnis leer ist..."
 # indem Sie eine leere Liste von Dateien abfragen.
 if [ -z "$(ls -A "$PERSISTENT_DIR")" ]; then
    echo "Das persistente Verzeichnis ist leer. Kopiere initiale Anwendungsdateien..."
-   # Kopiere alle Dateien vom temporären Quellverzeichnis in das persistente.
-   cp -r "$SOURCE_DIR/." "$PERSISTENT_DIR"
+   
+   # Kopiere alle Dateien außer den Deployment-Dateien.
+   find "$SOURCE_DIR" -maxdepth 1 -mindepth 1 -not -name "Dockerfile" -not -name "start.sh" -not -name "captain-definition" -exec cp -r {} "$PERSISTENT_DIR" \;
 else
    echo "Das persistente Verzeichnis enthält bereits Daten. Überspringe Kopiervorgang."
 fi
