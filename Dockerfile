@@ -1,3 +1,29 @@
+# Phase 1: Der "Builder" - Erstellt das Startskript
+# Wir verwenden ein einfaches Alpine-Image, um das Skript zu erstellen
+FROM alpine:3.18 as builder
+
+WORKDIR /app
+
+# Erstelle das Startskript mit printf
+# Diese Methode ist robuster, da sie keine Probleme mit Here-Documents hat
+# und das Skript unabhängig von Zeilenumbrüchen oder unsichtbaren Zeichen
+# auf der Host-Maschine korrekt erstellt.
+RUN printf '#!/bin/sh\n\n' > start.sh && \
+    printf 'PERSISTENT_DIR="/home/coder/$CAPTAIN_APP_NAME"\n' >> start.sh && \
+    printf 'TEMP_SOURCE_DIR="/tmp/app_source"\n\n' >> start.sh && \
+    printf 'echo "Erstelle persistentes Verzeichnis für $CAPTAIN_APP_NAME..."\n' >> start.sh && \
+    printf 'mkdir -p "$PERSISTENT_DIR"\n\n' >> start.sh && \
+    printf 'echo "Kopiere Anwendungsdateien in das persistente Verzeichnis..."\n' >> start.sh && \
+    printf 'cp -r "$TEMP_SOURCE_DIR/." "$PERSISTENT_DIR"\n\n' >> start.sh && \
+    printf 'echo "Starte Code-Server..."\n' >> start.sh && \
+    printf 'code-server \\\n' >> start.sh && \
+    printf '  --bind-addr 0.0.0.0:8080 \\\n' >> start.sh && \
+    printf '  --auth none \\\n' >> start.sh && \
+    printf '  --disable-telemetry \\\n' >> start.sh && \
+    printf '  "$PERSISTENT_DIR"\n' >> start.sh && \
+    chmod +x start.sh
+
+# Phase 2: Das finale Image
 # Verwenden Sie das offizielle code-server-Image als Basis.
 # Dieses Image enthält bereits Node.js, npm und Python.
 FROM ghcr.io/coder/code-server:latest
@@ -24,38 +50,15 @@ RUN apt-get update && \
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Erstellen des Startskripts direkt im Dockerfile mit einem "Here-Document"
-# Dies ist eine viel robustere Methode als die Verwendung von "echo",
-# da sie Probleme mit Escape-Zeichen und Zeilenumbrüchen vermeidet.
-RUN cat << 'EOF' > /start.sh
-#!/bin/sh
-
-# Das Verzeichnis, das von CapRover persistent gemacht wird
-PERSISTENT_DIR="/home/coder/$CAPTAIN_APP_NAME"
-TEMP_SOURCE_DIR="/tmp/app_source"
-
-echo "Erstelle persistentes Verzeichnis für $CAPTAIN_APP_NAME..."
-mkdir -p "$PERSISTENT_DIR"
-
-echo "Kopiere Anwendungsdateien in das persistente Verzeichnis..."
-cp -r "$TEMP_SOURCE_DIR/." "$PERSISTENT_DIR"
-
-echo "Starte Code-Server..."
-code-server \
-  --bind-addr 0.0.0.0:8080 \
-  --auth none \
-  --disable-telemetry \
-  "$PERSISTENT_DIR"
-EOF
-
-# Machen Sie das Startskript ausführbar
-RUN chmod +x /start.sh
+# Kopieren Sie das Startskript aus dem Builder-Image
+COPY --from=builder /app/start.sh /start.sh
 
 # Kopieren des gesamten Quellcodes
 COPY . /tmp/app_source/
 
 # Setzen Sie den dynamischen Startbefehl, der das Skript ausführt
 CMD ["/start.sh"]
+
 
 
 
