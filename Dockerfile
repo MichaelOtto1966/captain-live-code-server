@@ -19,11 +19,13 @@ RUN apt-get update && \
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Kopieren Sie alle Projektdateien, einschließlich des Startskripts.
-COPY . /app
+# Kopieren Sie alle Projektdateien in ein temporäres Verzeichnis.
+# Dies verhindert, dass Projektdateien direkt auf das persistente Volume kopiert werden.
+COPY . /app_temp/
 
 # Setzen Sie den dynamischen Startbefehl.
-# Dieser Befehl führt unser Startskript aus, das die App mit einem
+# Dieser Befehl führt ein Startskript aus, das die App mit einem
 # eindeutigen, dynamischen Verzeichnis startet.
-CMD ["/app/start.sh"]
+CMD ["/app_temp/start.sh"]
+
 
