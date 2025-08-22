@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 2,
+  "templateId": "caprover/code-server",
+  "dockerfileLines": [
+    "FROM ghcr.io/coder/code-server:latest",
+    "USER root",
+    "RUN apt-get update && apt-get install -y nodejs npm && npm install -g caprover && apt-get clean && rm -rf /var/lib/apt/lists/*",
+    "USER coder"
+  ]
+}
