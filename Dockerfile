@@ -24,22 +24,17 @@ RUN apt-get update && \
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Kopieren Sie den gesamten Quellcode in ein temporäres Verzeichnis
+# Kopieren Sie den gesamten Quellcode und das Startskript
 COPY . /tmp/app_source/
+COPY start.sh /tmp/app_source/start.sh
 
-# Setzen Sie den dynamischen Startbefehl
-# Der Code-Server wird mit einem dynamischen Arbeitsverzeichnis gestartet, das den App-Namen enthält.
-# --auth none erlaubt den Zugriff ohne Passwort
-# --disable-telemetry deaktiviert die Datenerfassung
-# `$$CAPTAIN_APP_NAME$$` wird von CapRover während des Deployments ersetzt
-# Die Dateien aus /tmp/app_source werden in das neue Verzeichnis kopiert
-#
-# Wichtiger Hinweis: Je nach Ihrem tatsächlichen Basis-Image
-# müssen Sie den genauen Startbefehl für den VS Code Server anpassen.
-# Überprüfen Sie die Dokumentation Ihres Images für den korrekten Befehl.
-CMD mkdir -p /home/coder/$$CAPTAIN_APP_NAME$$ && \
-    cp -r /tmp/app_source/. /home/coder/$$CAPTAIN_APP_NAME$$ && \
-    code-server --bind-addr 0.0.0.0:8080 --auth none --disable-telemetry /home/coder/$$CAPTAIN_APP_NAME$$
+# Machen Sie das Startskript ausführbar
+RUN chmod +x /tmp/app_source/start.sh
+
+# Setzen Sie den dynamischen Startbefehl, der das Skript ausführt
+# Das `start.sh`-Skript wird die App mit dem korrekten Verzeichnis starten.
+CMD ["/tmp/app_source/start.sh"]
+
 
 
 
