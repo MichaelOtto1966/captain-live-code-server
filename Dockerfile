@@ -1,13 +1,10 @@
 # Verwenden Sie das offizielle code-server-Image als Basis.
 FROM ghcr.io/coder/code-server:latest
 
-# Setzen Sie den Arbeitsordner im Container.
-WORKDIR /home/coder/
-
 # Legen Sie den Standard-Port fest.
 EXPOSE 8080
 
-# Wechseln Sie zu einem Benutzer mit Root-Rechten, um Pakete zu installieren
+# Wechseln Sie zu einem Benutzer mit Root-Rechten.
 USER root
 
 # Aktualisieren Sie die Paketliste und installieren Sie die notwendigen Tools.
@@ -20,12 +17,12 @@ RUN apt-get update && \
 USER coder
 
 # Kopieren Sie alle Projektdateien in ein temporäres Verzeichnis.
-# Dies verhindert, dass Projektdateien direkt auf das persistente Volume kopiert werden.
-COPY . /app_temp/
+# Dies stellt sicher, dass das persistente Volume unberührt bleibt.
+COPY . /tmp/app_source/
 
 # Setzen Sie den dynamischen Startbefehl.
-# Dieser Befehl führt ein Startskript aus, das die App mit einem
-# eindeutigen, dynamischen Verzeichnis startet.
-CMD ["/app_temp/start.sh"]
+# Dieser Befehl führt ein Startskript aus, das die App korrekt konfiguriert.
+CMD ["/tmp/app_source/start.sh"]
+
 
 
