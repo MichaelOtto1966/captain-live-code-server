@@ -4,17 +4,11 @@ FROM ghcr.io/coder/code-server:latest
 
 # Setzen Sie den Arbeitsordner im Container.
 # Alle nachfolgenden Befehle werden in diesem Verzeichnis ausgeführt.
-WORKDIR /home/coder/project
+WORKDIR /home/coder/
 
 # Legen Sie den Standard-Port fest, auf dem die App lauscht.
 # Wichtig: Dieser Port muss in CapRover in den App-Einstellungen auf 8080 gesetzt werden.
 EXPOSE 8080
-
-# Dieser VOLUME-Befehl ist eine Best-Practice. Er markiert das Verzeichnis
-# als Speicherort für persistente Daten. CapRover behandelt dies als
-# ein persistentes Verzeichnis, wenn Sie es in der App-Oberfläche festlegen.
-# Sie müssen in CapRover das interne Verzeichnis auf /home/coder/project setzen.
-VOLUME /home/coder/project
 
 # Wechseln Sie zu einem Benutzer mit Root-Rechten, um Pakete zu installieren
 USER root
@@ -30,12 +24,23 @@ RUN apt-get update && \
 # Wechseln Sie zurück zum Standardbenutzer "coder"
 USER coder
 
-# Standardbefehl zum Starten des code-servers.
-# --bind-addr 0.0.0.0:8080 stellt sicher, dass der Server auf allen
-# Netzwerkschnittstellen erreichbar ist, was für Docker und CapRover wichtig ist.
-# /home/coder/project ist das Standard-Arbeitsverzeichnis, das in der VS Code-Oberfläche
-# angezeigt wird.
-CMD ["/usr/bin/dumb-init", "code-server", "--bind-addr", "0.0.0.0:8080", "/home/coder/project"]
+# Kopieren Sie den gesamten Quellcode in ein temporäres Verzeichnis
+COPY . /tmp/app_source/
+
+# Setzen Sie den dynamischen Startbefehl
+# Der Code-Server wird mit einem dynamischen Arbeitsverzeichnis gestartet, das den App-Namen enthält.
+# --auth none erlaubt den Zugriff ohne Passwort
+# --disable-telemetry deaktiviert die Datenerfassung
+# `$$CAPTAIN_APP_NAME$$` wird von CapRover während des Deployments ersetzt
+# Die Dateien aus /tmp/app_source werden in das neue Verzeichnis kopiert
+#
+# Wichtiger Hinweis: Je nach Ihrem tatsächlichen Basis-Image
+# müssen Sie den genauen Startbefehl für den VS Code Server anpassen.
+# Überprüfen Sie die Dokumentation Ihres Images für den korrekten Befehl.
+CMD mkdir -p /home/coder/$$CAPTAIN_APP_NAME$$ && \
+    cp -r /tmp/app_source/. /home/coder/$$CAPTAIN_APP_NAME$$ && \
+    code-server --bind-addr 0.0.0.0:8080 --auth none --disable-telemetry /home/coder/$$CAPTAIN_APP_NAME$$
+
 
 
 
