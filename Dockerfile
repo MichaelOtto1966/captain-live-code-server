@@ -10,6 +10,7 @@ USER root
 # Aktualisieren Sie die Paketliste und installieren Sie die notwendigen Tools.
 RUN apt-get update && \
     apt-get install -y nodejs npm && \
+    npm install -g caprover && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -26,6 +27,7 @@ WORKDIR /home/coder/project
 # Setzen Sie den Standardbefehl, der den Code-Server startet.
 # Der Pfad zeigt auf das Arbeitsverzeichnis, in das CapRover Ihre Daten kopiert.
 CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "/home/coder/project"]
+
 
 
 
