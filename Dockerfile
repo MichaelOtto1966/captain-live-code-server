@@ -29,9 +29,15 @@ USER coder
 # Wichtig: CapRover wird Ihre Quelldateien zur Laufzeit hierher kopieren.
 WORKDIR /home/coder/project
 
+# NEU: Setzen Sie die Umgebungsvariable NODE_OPTIONS, um den Speicher zu begrenzen.
+# --max-old-space-size ist die korrekte Option für Node.js.
+# Hier auf 2 Gigabyte gesetzt (2048 MB).
+ENV NODE_OPTIONS=--max-old-space-size=2048
+
 # Setzen Sie den Standardbefehl, der den Code-Server startet.
-# Der Pfad zeigt auf das Arbeitsverzeichnis, in das CapRover Ihre Daten kopiert.
-CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "--max-memory", "2G", "/home/coder/project"]
+# Entfernen Sie die nicht-existierende --max-memory Option.
+CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "/home/coder/project"]
+
 
 
 
