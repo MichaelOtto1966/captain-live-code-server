@@ -14,6 +14,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Installieren Sie die VS Code-Erweiterungen.
+# Fügen Sie hier die ID der Erweiterung ein, die Sie persistent installieren möchten.
+# Beispiel: RUN code-server --install-extension roonie007.hide-files
+RUN code-server --install-extension sguerri.simple-hide-files
+
 # Ändern Sie den Besitzer des Home-Verzeichnisses zu "coder".
 RUN chown -R coder:coder /home/coder
 
@@ -26,7 +31,8 @@ WORKDIR /home/coder/project
 
 # Setzen Sie den Standardbefehl, der den Code-Server startet.
 # Der Pfad zeigt auf das Arbeitsverzeichnis, in das CapRover Ihre Daten kopiert.
-CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "/home/coder/project"]
+CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "--max-memory", "2G", "/home/coder/project"]
+
 
 
 
