@@ -36,7 +36,8 @@ ENV NODE_OPTIONS=--max-old-space-size=2048
 
 # Setzen Sie den Standardbefehl, der den Code-Server startet.
 # Entfernen Sie die nicht-existierende --max-memory Option.
-CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "none", "/home/coder/project"]
+CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "password", "--password", "$(PASSWORD)", "/home/coder/project"]
+
 
 
 
