@@ -13,8 +13,9 @@ USER root
 
 # Kopieren Sie die vsda-Dateien aus der temporären Stage in das endgültige Image.
 # Dies behebt das Problem mit den fehlenden Dateien, die der Support gemeldet hat.
-COPY --from=vsda-extractor /usr/lib/code-server/lib/vscode/out/vs/workbench/contrib/local/browser/vsda_bg.wasm /usr/lib/code-server/lib/vscode/out/vs/workbench/contrib/local/browser/vsda_bg.wasm
-COPY --from=vsda-extractor /usr/lib/code-server/lib/vscode/out/vs/workbench/contrib/local/browser/vsda.js /usr/lib/code-server/lib/vscode/out/vs/workbench/contrib/local/browser/vsda.js
+# Wichtige Korrektur: Die Dateipfade wurden an die neue Struktur von code-server angepasst.
+COPY --from=vsda-extractor /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+COPY --from=vsda-extractor /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
 
 # Aktualisieren Sie die Paketliste und installieren Sie die notwendigen Tools.
 RUN apt-get update && \
