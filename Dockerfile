@@ -25,15 +25,15 @@ USER coder
 WORKDIR /home/coder/project
 
 # Installieren Sie die VS Code-Erweiterungen.
+# Fügen Sie hier die ID der Erweiterung ein, die Sie persistent installieren möchten.
+# Beispiel: RUN code-server --install-extension roonie007.hide-files
 RUN code-server --install-extension sguerri.simple-hide-files
 
-# NEU: Kopieren Sie vsda-Dateien an den korrekten Ort, um den Absturz zu beheben.
-# Diese Dateien sind nur in den node_modules verfügbar und müssen manuell kopiert werden.
-RUN cp /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js && \
-    cp /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm /usr/lib/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
-
 # NEU: Setzen Sie die Umgebungsvariable NODE_OPTIONS, um den Speicher zu begrenzen.
+# --max-old-space-size ist die korrekte Option für Node.js.
+# Hier auf 2 Gigabyte gesetzt (2048 MB).
 ENV NODE_OPTIONS=--max-old-space-size=2048
 
 # Setzen Sie den Standardbefehl, der den Code-Server startet.
+# Entfernen Sie die nicht-existierende --max-memory Option.
 CMD ["code-server", "--bind-addr", "0.0.0.0:8080", "--auth", "password", "/home/coder/project"]
